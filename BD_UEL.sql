@@ -1,21 +1,12 @@
--- =====================================================================
--- BANCO DE DADOS - GRUPO ESCOTEIRO
--- Script para MySQL Workbench
--- =====================================================================
-
 CREATE DATABASE IF NOT EXISTS grupo_escoteiro
     DEFAULT CHARACTER SET utf8mb4
     DEFAULT COLLATE utf8mb4_unicode_ci;
 
 USE grupo_escoteiro;
 
--- =====================================================================
--- 1. ESTRUTURA DO GRUPO: SEÇÕES E PATRULHAS
--- =====================================================================
-
 CREATE TABLE secoes (
     id_secao        INT AUTO_INCREMENT PRIMARY KEY,
-    nome            VARCHAR(50) NOT NULL,          -- Ex: Alcateia, Tropa Escoteira
+    nome            VARCHAR(50) NOT NULL,          
     faixa_etaria_min TINYINT NOT NULL,
     faixa_etaria_max TINYINT NOT NULL,
     descricao       VARCHAR(255)
@@ -24,16 +15,12 @@ CREATE TABLE secoes (
 CREATE TABLE patrulhas (
     id_patrulha     INT AUTO_INCREMENT PRIMARY KEY,
     id_secao        INT NOT NULL,
-    nome            VARCHAR(50) NOT NULL,          -- Ex: Patrulha Águia
+    nome            VARCHAR(50) NOT NULL,          
     lema            VARCHAR(100),
     CONSTRAINT fk_patrulha_secao FOREIGN KEY (id_secao)
         REFERENCES secoes(id_secao)
         ON DELETE CASCADE
 ) ENGINE=InnoDB;
-
--- =====================================================================
--- 2. MEMBROS (jovens e escotistas/dirigentes)
--- =====================================================================
 
 CREATE TABLE membros (
     id_membro       INT AUTO_INCREMENT PRIMARY KEY,
@@ -45,7 +32,7 @@ CREATE TABLE membros (
     id_patrulha     INT,
     telefone        VARCHAR(20),
     email           VARCHAR(120),
-    nome_responsavel VARCHAR(150),                 -- para menores de idade
+    nome_responsavel VARCHAR(150),                 
     telefone_responsavel VARCHAR(20),
     data_ingresso   DATE NOT NULL DEFAULT (CURRENT_DATE),
     ativo           BOOLEAN NOT NULL DEFAULT TRUE,
@@ -55,14 +42,10 @@ CREATE TABLE membros (
         REFERENCES patrulhas(id_patrulha) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- =====================================================================
--- 3. PROGRESSÃO: ESPECIALIDADES E CLASSES
--- =====================================================================
-
 CREATE TABLE especialidades (
     id_especialidade INT AUTO_INCREMENT PRIMARY KEY,
     nome            VARCHAR(100) NOT NULL,
-    area            VARCHAR(50),                   -- Ex: Meio Ambiente, Cultura, Tecnologia
+    area            VARCHAR(50),                  
     descricao       VARCHAR(255)
 ) ENGINE=InnoDB;
 
@@ -82,21 +65,17 @@ CREATE TABLE membro_especialidades (
 CREATE TABLE progressao_classes (
     id_progressao   INT AUTO_INCREMENT PRIMARY KEY,
     id_membro       INT NOT NULL,
-    nome_etapa      VARCHAR(100) NOT NULL,          -- Ex: Escoteiro Pleno, 1ª Classe
+    nome_etapa      VARCHAR(100) NOT NULL,
     data_conquista  DATE NOT NULL,
     observacoes     VARCHAR(255),
     CONSTRAINT fk_progressao_membro FOREIGN KEY (id_membro)
         REFERENCES membros(id_membro) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- =====================================================================
--- 4. FINANCEIRO: MENSALIDADES
--- =====================================================================
-
 CREATE TABLE mensalidades (
     id_mensalidade  INT AUTO_INCREMENT PRIMARY KEY,
     id_membro       INT NOT NULL,
-    mes_referencia  DATE NOT NULL,                  -- Ex: 2026-07-01 representa julho/2026
+    mes_referencia  DATE NOT NULL,                  
     valor           DECIMAL(10,2) NOT NULL,
     status_pagamento ENUM('pendente', 'pago', 'atrasado', 'isento') NOT NULL DEFAULT 'pendente',
     data_pagamento  DATE,
@@ -105,10 +84,6 @@ CREATE TABLE mensalidades (
         REFERENCES membros(id_membro) ON DELETE CASCADE,
     UNIQUE KEY uq_membro_mes (id_membro, mes_referencia)
 ) ENGINE=InnoDB;
-
--- =====================================================================
--- 5. ATIVIDADES E PRESENÇA
--- =====================================================================
 
 CREATE TABLE atividades (
     id_atividade    INT AUTO_INCREMENT PRIMARY KEY,
@@ -134,13 +109,9 @@ CREATE TABLE presencas (
     UNIQUE KEY uq_atividade_membro (id_atividade, id_membro)
 ) ENGINE=InnoDB;
 
--- =====================================================================
--- 6. EVENTOS E ACAMPAMENTOS
--- =====================================================================
-
 CREATE TABLE eventos (
     id_evento       INT AUTO_INCREMENT PRIMARY KEY,
-    nome            VARCHAR(150) NOT NULL,          -- Ex: Acampamento de Verão, Jamboree
+    nome            VARCHAR(150) NOT NULL,          
     tipo            ENUM('acampamento', 'distrital', 'regional', 'nacional', 'internacional', 'outro') NOT NULL,
     data_inicio     DATE NOT NULL,
     data_fim        DATE NOT NULL,
@@ -165,18 +136,10 @@ CREATE TABLE inscricoes_eventos (
     UNIQUE KEY uq_evento_membro (id_evento, id_membro)
 ) ENGINE=InnoDB;
 
--- =====================================================================
--- ÍNDICES ADICIONAIS PARA CONSULTAS FREQUENTES
--- =====================================================================
-
 CREATE INDEX idx_membros_secao ON membros(id_secao);
 CREATE INDEX idx_membros_patrulha ON membros(id_patrulha);
 CREATE INDEX idx_mensalidades_status ON mensalidades(status_pagamento);
 CREATE INDEX idx_presencas_atividade ON presencas(id_atividade);
-
--- =====================================================================
--- DADOS INICIAIS DE EXEMPLO (opcional - pode remover se não quiser)
--- =====================================================================
 
 INSERT INTO secoes (nome, faixa_etaria_min, faixa_etaria_max, descricao) VALUES
 ('Alcateia', 7, 10, 'Ramo Lobinho'),
